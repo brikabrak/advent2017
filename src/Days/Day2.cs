@@ -1,18 +1,25 @@
 using Advent;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Advent.Days
 {
     class Day2 : Day
     {
-        private string[] buffer;
+        private string[] _buffer;
+        private List<string[]> _cachedInput;
 
         public Day2(string[] inputs)
         {
-            this.buffer = inputs;
+            this._buffer = inputs;
+            this._cachedInput = new List<string[]>();
+
+            foreach(var input in this._buffer)
+            {
+                this._cachedInput.Add(input.Split(new char[]{' ', '\t'}, StringSplitOptions.RemoveEmptyEntries));
+            }
         }
 
         public void PrintResults()
@@ -22,10 +29,10 @@ namespace Advent.Days
                 System.Console.WriteLine(result);
             }
 
-            // foreach(var result in DoPartB())
-            // {
-            //     System.Console.WriteLine(result);
-            // }
+            foreach(var result in DoPartB())
+            {
+                System.Console.WriteLine(result);
+            }
         }
 
         private string[] DoPartA()
@@ -33,19 +40,19 @@ namespace Advent.Days
             var differences = new List<int>();
 
             var minMaxValues = new int[2]{-1, -1};
-            foreach (var input in buffer) {
-                var parsedValues = input.Split(new char[]{' ', '\t'}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var parsedValues in this._cachedInput)
+            {
                 foreach (var number in parsedValues)
                 {
                     var parsedNumber = int.Parse(number);
-                    if(minMaxValues[1] == -1 || minMaxValues[1] < parsedNumber)
-                    {
-                        minMaxValues[1] = parsedNumber;
-                    }
-                    if(minMaxValues[0] == -1 ||minMaxValues[0] > parsedNumber)
-                    {
-                        minMaxValues[0] = parsedNumber;
-                    }
+
+                    minMaxValues[1] = (minMaxValues[1] == -1 || minMaxValues[1] < parsedNumber)
+                        ? parsedNumber
+                        : minMaxValues[1];
+
+                    minMaxValues[0] = (minMaxValues[0] == -1 || minMaxValues[0] > parsedNumber)
+                        ? parsedNumber
+                        : minMaxValues[0];
                 }
                 differences.Add(minMaxValues[1] - minMaxValues[0]);
                 minMaxValues[0] = minMaxValues[1] = -1;
@@ -54,24 +61,31 @@ namespace Advent.Days
             return new string[]{differences.Sum().ToString()};
         }
 
-        // private string[] DoPartB()
-        // {
-        //     var results = new List<string>();
+        private string[] DoPartB()
+        {
+            var quotients = new List<int>();
 
-        //     var target = 0;
-        //     var moves = 0;
-        //     foreach (var input in buffer) {
-        //         moves = input.Length / 2;
-        //         for (var i = 0; i < input.Length; i++)
-        //         {
-        //             target = (moves + i) % input.Length;
-        //             sum += (input[i] == input[target]) ? int.Parse(input[i].ToString()) : 0;
-        //         }
-        //         results.Add(sum.ToString());
-        //         sum = 0;
-        //     }
+            var quotient = 0;
+            foreach (var parsedValues in this._cachedInput)
+            {
+                for (var i = 0; i < parsedValues.Length && quotient == 0; i++)
+                {
+                    var x = int.Parse(parsedValues[i]);
+                    for (var j = i + 1; j < parsedValues.Length && quotient == 0; j++)
+                    {
+                        var y = int.Parse(parsedValues[j]);
+                        quotient = (x > y && x % y == 0) 
+                            ? x / y
+                            : (y % x == 0)
+                                ? y / x
+                                : 0;
+                    }
+                }
+                quotients.Add(quotient);
+                quotient = 0;
+            }
 
-        //     return results.ToArray();
-        // }
+            return new string[]{quotients.Sum().ToString()};
+        }
     }
 }

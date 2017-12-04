@@ -39,7 +39,7 @@ namespace Advent.Days
         {
             var differences = new List<int>();
 
-            var minMaxValues = new int[2]{-1, -1};
+            var minMaxValues = new int[]{-1, -1};
             foreach (var parsedValues in this._cachedInput)
             {
                 foreach (var number in parsedValues)

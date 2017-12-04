@@ -17,10 +17,10 @@ namespace Advent
             Configuration = builder.Build();
 
             var inputTarget = (Boolean.Parse(Configuration["isDebug"])) ? "scratch" : "input";
-            var resourcePath = Configuration["resourcePath"].Replace("{object}", typeof(Days.Day2).Name).Replace("{input}", inputTarget);
+            var resourcePath = Configuration["resourcePath"].Replace("{object}", typeof(Days.Day3).Name).Replace("{input}", inputTarget);
             var input = System.IO.File.ReadAllLines(resourcePath);
 
-            var day = new Days.Day2(input);
+            var day = new Days.Day3(input);
             day.PrintResults();
         }
     }

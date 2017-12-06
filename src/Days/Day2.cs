@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Advent.Days
 {
-    class Day2 : Day
+    class Day2 : IDay
     {
         private string[] _buffer;
         private List<string[]> _cachedInput;

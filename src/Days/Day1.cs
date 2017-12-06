@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Advent.Days
 {
-    class Day1 : Day
+    class Day1 : IDay
     {
         private string[] buffer;
         private int sum;

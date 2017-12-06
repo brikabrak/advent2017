@@ -1,6 +1,6 @@
-namespace Advent
+namespace Advent.Days
 {
-    interface Day
+    interface IDay
     {
         void PrintResults();
     }

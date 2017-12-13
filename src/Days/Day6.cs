@@ -16,36 +16,31 @@ namespace Advent.Days
 
         public void PrintResults()
         {
-            foreach(var result in DoPartA())
-            {
-                System.Console.WriteLine(result);
-            }
-
-            foreach(var result in DoPartB())
+            foreach(var result in DoPartAB())
             {
                 System.Console.WriteLine(result);
             }
         }
 
-        private string[] DoPartA()
+        private string[] DoPartAB()
         {
+            var results = new List<string>();
             var memory = new int[this._buffer.Length];
             for (var i = 0; i < memory.Length; i++)
             {
                 memory[i] = int.Parse(this._buffer[i]);
             }
 
-            var isSimilar = false;
-            var count = 0;
+            bool isSimilar = false, secondaryState = false;
+            int maxValue = 0, traverse = 0, targetIndex = 0, count = 0;
             var memoryMap = new List<string>();
-            var targetIndex = 0;
             while (!isSimilar)
             {
                 count++;
 
-                var maxValue = memory.Max();
+                maxValue = memory.Max();
                 targetIndex = Array.IndexOf(memory, maxValue);
-                var traverse = targetIndex;
+                traverse = targetIndex;
                 memory[targetIndex] = 0;
                 while (maxValue != 0)
                 {
@@ -55,16 +50,22 @@ namespace Advent.Days
                 }
 
                 var mappedMemory = string.Join("", memory);
-                isSimilar = (memoryMap.Contains(mappedMemory));
+                isSimilar = memoryMap.Contains(mappedMemory);
+                
+                if (isSimilar && !secondaryState)
+                {
+                    results.Add(count.ToString());
+                    memoryMap.Clear();
+                    count = 0;
+                    isSimilar = false;
+                    secondaryState = true;
+                }
+
                 memoryMap.Add(mappedMemory);
             }
 
-            return new string[]{count.ToString()};
-        }
-
-        private string[] DoPartB()
-        {
-            return new string[]{};
+            results.Add(count.ToString());
+            return results.ToArray();
         }
     }
 }

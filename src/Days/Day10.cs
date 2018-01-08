@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Advent.Days
 {
     class Day10 : IDay
     {
         private const int LENGTH = 256;
+        private const string SUFFIX = "17,31,73,47,23";
 
         sealed class Node
         {
@@ -24,11 +27,14 @@ namespace Advent.Days
         public Day10(string[] inputs)
         {
             this._buffer = inputs;
+        }
 
+        private void BuildNodes(int size)
+        {
             this._head = new Node(0);
-            var a = this._head;
-            var b = this._head;
-            for(var i = 1; i < LENGTH; i++)
+            Node a = this._head, b = this._head;
+
+            for (var i = 1; i < size; i++)
             {
                 a = new Node(i);
                 a.Previous = b;
@@ -41,11 +47,13 @@ namespace Advent.Days
 
         public void PrintResults()
         {
+            BuildNodes(LENGTH);
             foreach(var result in DoPartA())
             {
                 System.Console.WriteLine(result);
             }
 
+            BuildNodes(LENGTH);
             foreach(var result in DoPartB())
             {
                 System.Console.WriteLine(result);
@@ -54,37 +62,76 @@ namespace Advent.Days
 
         private string[] DoPartA()
         {
-            var input = this._buffer[0].Split(',');
+            var input = Array.ConvertAll(this._buffer[0].Split(','), int.Parse);
             var index = this._head;
             var skipCount = 0;
-            foreach(var move in input)
-            {
-                var moves = int.Parse(move);
-                var count = moves;
-                var start = index;
-                while (--count > 0)
-                {
-                    index = index.Next;
-                }
 
-                Reverse(moves, start, index);
-
-                count = 1 + skipCount++;
-                while (count-- > 0)
-                {
-                    index = index.Next;
-                }
-            }
+            PerformKnot(input, ref index, ref skipCount);
 
             return new string[]{(this._head.Value * this._head.Next.Value).ToString()};
         }
 
         private string[] DoPartB()
         {
-            return new string[]{};
+            var input = Array.ConvertAll(GetASCIIValues(this._buffer[0]), b => (int)b);
+            var index = this._head;
+            var skipCount = 0;
+
+            for (var i = 0; i < 64; i++)
+            {
+                skipCount = PerformKnot(input, ref index, ref skipCount);
+            }
+
+            var hex = new StringBuilder();
+            var bitwise = 0;
+            var count = 0;
+            index = this._head;
+            while (count++ != LENGTH)
+            {
+                bitwise = bitwise ^ index.Value;
+                if (count % 16 == 0)
+                {
+                    var value = bitwise.ToString("X");
+                    hex.Append((value.Length != 2) ? "0" + value : value);
+                    bitwise = 0;
+                }
+                index = index.Next;
+            }
+
+            return new string[]{hex.ToString()};
         }
 
-        private void Reverse(int moves, Node a, Node b)
+        private int PerformKnot(int[] lengths, ref Node position, ref int skipCount)
+        {
+            Node start = position, index = position;
+            var count = 0;
+            foreach (var move in lengths)
+            {
+                count = move;
+                start = index;
+                index = MoveForward(index, count - 1);
+
+                ReverseRange(move, start, index);
+
+                count = 1 + skipCount++;
+                index = MoveForward(index, count);
+            }
+
+            position = index;
+            return skipCount;
+        }
+
+        private Node MoveForward(Node node, int moves)
+        {
+            while (moves-- > 0)
+            {
+                node = node.Next;
+            }
+
+            return node;
+        }
+
+        private void ReverseRange(int moves, Node a, Node b)
         {
             if (moves <= 1)
             {
@@ -95,7 +142,23 @@ namespace Advent.Days
             b.Value = a.Value;
             a.Value = t;
 
-            Reverse(moves - 2, a.Next, b.Previous);
+            ReverseRange(moves - 2, a.Next, b.Previous);
+        }
+
+        private byte[] GetASCIIValues(string input)
+        {
+            var ascii = new List<byte>();
+            foreach (var b in System.Text.Encoding.UTF8.GetBytes(input.ToCharArray()))
+            {
+                ascii.Add(b);
+            }
+
+            foreach (var suffix in SUFFIX.Split(','))
+            {
+                ascii.Add(byte.Parse(suffix));
+            }
+
+            return ascii.ToArray();
         }
     }
 }
